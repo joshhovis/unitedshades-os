@@ -1,0 +1,152 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum JobStatus {
+  DRAFT
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userRoles UserRole[]
+}
+
+model Role {
+  id        String   @id @default(cuid())
+  name      String   @unique // e.g. "ADMIN"
+  createdAt DateTime @default(now())
+
+  userRoles UserRole[]
+}
+
+model UserRole {
+  userId String
+  roleId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phoneRaw  String?
+  phoneE164 String?  @unique
+  email     String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vehicles Vehicle[]
+  jobs     Job[]
+  photos   JobPhoto[]
+}
+
+model Vehicle {
+  id         String   @id @default(cuid())
+  customerId String
+  year       Int?
+  make       String?
+  model      String?
+  trim       String?
+  vin        String?
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  jobs     Job[]
+}
+
+model Job {
+  id          String    @id @default(cuid())
+  customerId  String
+  vehicleId   String?
+  status      JobStatus @default(DRAFT)
+  scheduledAt DateTime?
+  completedAt DateTime?
+
+  subtotalCents Int @default(0)
+  taxCents      Int @default(0)
+  totalCents    Int @default(0)
+
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customer  Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  vehicle   Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+
+  lineItems JobLineItem[]
+  jobNotes  JobNote[]
+  photos    JobPhoto[]
+}
+
+model JobLineItem {
+  id          String   @id @default(cuid())
+  jobId       String
+  description String
+  qty         Int      @default(1)
+  unitPriceCents Int   @default(0)
+  totalCents  Int      @default(0)
+
+  createdAt DateTime @default(now())
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+}
+
+model JobNote {
+  id        String   @id @default(cuid())
+  jobId     String
+  content   String
+  createdAt DateTime @default(now())
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+}
+
+model JobPhoto {
+  id         String   @id @default(cuid())
+  jobId      String
+  customerId String
+
+  s3Key      String
+  url        String?
+  tags       String?  // comma-separated or JSON later
+  createdAt  DateTime @default(now())
+
+  job      Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([customerId])
+}

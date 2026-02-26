@@ -1,0 +1,30 @@
+# Node
+node_modules
+.pnpm-store
+
+# Logs
+logs
+*.log
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist
+.next
+out
+
+# Docker volumes
+infra/docker/usos_pgdata
+
+# Prisma
+packages/db/prisma/dev.db
+
+# VSCode
+.vscode/settings.json

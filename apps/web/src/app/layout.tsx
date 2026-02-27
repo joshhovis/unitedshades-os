@@ -1,5 +1,4 @@
 import './globals.css';
-import Nav from '@/components/Nav';
 
 export default function RootLayout({
   children,
@@ -8,10 +7,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en'>
-      <body>
-        <Nav />
-        <main className='max-w-5xl mx-auto'>{children}</main>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

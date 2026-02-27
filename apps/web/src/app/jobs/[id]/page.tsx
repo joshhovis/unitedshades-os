@@ -75,6 +75,10 @@ export default function JobDetailPage() {
   const [uploadResp, setUploadResp] = useState<UploadUrlResponse | null>(null);
   const [uploadErr, setUploadErr] = useState<string>('');
 
+  const [status, setStatus] = useState<Job['status']>('DRAFT');
+  const [scheduledAt, setScheduledAt] = useState(''); // datetime-local value
+  const [jobErr, setJobErr] = useState('');
+
   const money = useMemo(() => {
     const subtotal = (job?.subtotalCents ?? 0) / 100;
     const tax = (job?.taxCents ?? 0) / 100;
@@ -86,6 +90,9 @@ export default function JobDetailPage() {
     if (!jobId) return;
     const data = await api<JobDetail>(`/jobs/${jobId}`);
     setJob(data);
+
+    setStatus(data.status);
+    setScheduledAt(data.scheduledAt ? data.scheduledAt.slice(0, 16) : '');
   }
 
   async function addLineItem() {
@@ -146,6 +153,32 @@ export default function JobDetailPage() {
       setUploadResp(resp);
     } catch (e) {
       setUploadErr(e instanceof Error ? e.message : 'Failed to get upload URL');
+    }
+  }
+
+  async function updateJob() {
+    if (!jobId) return;
+
+    setJobErr('');
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const body: any = { status };
+
+    if (scheduledAt.trim().length) {
+      // datetime-local -> ISO
+      body.scheduledAt = new Date(scheduledAt).toISOString();
+    } else {
+      body.scheduledAt = null;
+    }
+
+    try {
+      await api(`/jobs/${jobId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      });
+      await load();
+    } catch (e) {
+      setJobErr(e instanceof Error ? e.message : 'Failed to update job');
     }
   }
 
@@ -267,6 +300,36 @@ export default function JobDetailPage() {
               )}
             </div>
           </div>
+
+          {/* Job Status */}
+          <div className='grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2'>
+            <select
+              className='border rounded px-3 py-2'
+              value={status}
+              onChange={(e) => setStatus(e.target.value as Job['status'])}
+            >
+              <option value='DRAFT'>DRAFT</option>
+              <option value='SCHEDULED'>SCHEDULED</option>
+              <option value='IN_PROGRESS'>IN_PROGRESS</option>
+              <option value='COMPLETED'>COMPLETED</option>
+              <option value='CANCELED'>CANCELED</option>
+            </select>
+
+            <input
+              className='border rounded px-3 py-2'
+              type='datetime-local'
+              value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+            />
+
+            <button className='border rounded px-3 py-2' onClick={updateJob}>
+              Update job
+            </button>
+          </div>
+
+          {jobErr ? (
+            <div className='text-sm opacity-80 pt-2'>{jobErr}</div>
+          ) : null}
 
           {/* Notes */}
           <div className='border rounded'>

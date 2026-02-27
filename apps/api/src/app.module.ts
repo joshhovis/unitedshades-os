@@ -7,10 +7,13 @@ import { CustomersModule } from './customers/customers.module';
 import { JobsService } from './jobs/jobs.service';
 import { JobsController } from './jobs/jobs.controller';
 import { JobsModule } from './jobs/jobs.module';
+import { VehiclesService } from './vehicles/vehicles.service';
+import { VehiclesController } from './vehicles/vehicles.controller';
+import { VehiclesModule } from './vehicles/vehicles.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, CustomersModule, JobsModule],
-  controllers: [AppController, JobsController],
-  providers: [AppService, JobsService],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, CustomersModule, JobsModule, VehiclesModule],
+  controllers: [AppController, JobsController, VehiclesController],
+  providers: [AppService, JobsService, VehiclesService],
 })
 export class AppModule {}

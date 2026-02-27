@@ -409,7 +409,7 @@ export default function JobDetailPage() {
                   <div>
                     <span className='font-semibold'>key:</span> {uploadResp.key}
                   </div>
-                  <div className='break-words'>
+                  <div className='wrap-break-word'>
                     <span className='font-semibold'>uploadUrl:</span>{' '}
                     {uploadResp.uploadUrl}
                   </div>

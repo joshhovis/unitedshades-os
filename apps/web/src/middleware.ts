@@ -9,7 +9,7 @@ export function middleware(req: NextRequest) {
   if (pathname.startsWith('/login')) {
     if (token) {
       const url = req.nextUrl.clone();
-      url.pathname = '/customers';
+      url.pathname = '/dashboard';
       return NextResponse.redirect(url);
     }
     return NextResponse.next();

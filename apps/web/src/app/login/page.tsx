@@ -27,7 +27,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.replace('/customers');
+    router.replace('/dashboard');
   }
 
   return (

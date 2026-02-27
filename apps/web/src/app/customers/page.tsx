@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import Link from 'next/link';
 
 type Customer = {
   id: string;
@@ -68,11 +69,15 @@ export default function CustomersPage() {
 
       <div className='border rounded'>
         {customers.map((c) => (
-          <div key={c.id} className='p-3 border-b last:border-b-0'>
+          <Link
+            key={c.id}
+            href={`/customers/${c.id}`}
+            className='block p-3 border-b last:border-b-0 hover:bg-black/5'
+          >
             <div className='font-semibold'>{c.name}</div>
             <div className='text-sm opacity-70'>{c.email ?? ''}</div>
             <div className='text-xs opacity-50'>{c.id}</div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

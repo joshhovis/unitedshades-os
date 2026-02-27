@@ -106,6 +106,8 @@ model Job {
   lineItems JobLineItem[]
   jobNotes  JobNote[]
   photos    JobPhoto[]
+
+  inventoryMovements InventoryMovement[]
 }
 
 model JobLineItem {
@@ -149,4 +151,40 @@ model JobPhoto {
 
   @@index([jobId])
   @@index([customerId])
+}
+
+model InventoryItem {
+  id               String   @id @default(cuid())
+  name             String
+  sku              String?  @unique
+  unit             String   @default("each") // e.g. roll, each, ft
+  reorderThreshold Int      @default(0)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  movements InventoryMovement[]
+}
+
+enum InventoryReason {
+  RESTOCK
+  JOB_USAGE
+  WASTE
+  ADJUSTMENT
+}
+
+model InventoryMovement {
+  id        String          @id @default(cuid())
+  itemId    String
+  qtyChange Int             // + adds stock, - removes stock
+  reason    InventoryReason
+  note      String?
+  jobId     String?         // optional link to a job
+  createdAt DateTime        @default(now())
+
+  item InventoryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  job  Job?          @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  @@index([itemId])
+  @@index([jobId])
 }

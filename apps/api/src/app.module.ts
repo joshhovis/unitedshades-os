@@ -13,9 +13,10 @@ import { VehiclesModule } from './vehicles/vehicles.module';
 import { JobLineItemsModule } from './job-line-items/job-line-items.module';
 import { JobNotesModule } from './job-notes/job-notes.module';
 import { PhotosModule } from './photos/photos.module';
+import { InventoryModule } from './inventory/inventory.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, CustomersModule, JobsModule, VehiclesModule, JobLineItemsModule, JobNotesModule, PhotosModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, CustomersModule, JobsModule, VehiclesModule, JobLineItemsModule, JobNotesModule, PhotosModule, InventoryModule],
   controllers: [AppController, JobsController, VehiclesController],
   providers: [AppService, JobsService, VehiclesService],
 })

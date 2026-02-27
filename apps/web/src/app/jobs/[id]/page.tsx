@@ -52,6 +52,12 @@ type JobDetail = Job & {
   photos: JobPhoto[];
 };
 
+type UploadUrlResponse = {
+  uploadUrl: string;
+  key: string;
+  photoId: string;
+};
+
 export default function JobDetailPage() {
   const params = useParams<{ id: string }>();
   const jobId = params?.id;
@@ -63,6 +69,11 @@ export default function JobDetailPage() {
   const [unit, setUnit] = useState('0');
 
   const [note, setNote] = useState('');
+
+  const [fileName, setFileName] = useState('test.jpg');
+  const [contentType, setContentType] = useState('image/jpeg');
+  const [uploadResp, setUploadResp] = useState<UploadUrlResponse | null>(null);
+  const [uploadErr, setUploadErr] = useState<string>('');
 
   const money = useMemo(() => {
     const subtotal = (job?.subtotalCents ?? 0) / 100;
@@ -114,6 +125,28 @@ export default function JobDetailPage() {
 
     setNote('');
     await load();
+  }
+
+  async function getUploadUrl() {
+    if (!jobId || !job) return;
+
+    setUploadErr('');
+    setUploadResp(null);
+
+    try {
+      const resp = await api<UploadUrlResponse>('/photos/upload-url', {
+        method: 'POST',
+        body: JSON.stringify({
+          jobId,
+          customerId: job.customerId,
+          fileName: fileName.trim(),
+          contentType: contentType.trim(),
+        }),
+      });
+      setUploadResp(resp);
+    } catch (e) {
+      setUploadErr(e instanceof Error ? e.message : 'Failed to get upload URL');
+    }
   }
 
   useEffect(() => {
@@ -272,12 +305,62 @@ export default function JobDetailPage() {
             </div>
           </div>
 
-          {/* Photos (metadata only) */}
           <div className='border rounded'>
             <div className='p-4 border-b font-semibold'>Photos</div>
-            <div className='p-4 opacity-70'>
+
+            <div className='p-4 space-y-3 border-b'>
+              <div className='text-sm font-medium'>Generate upload URL</div>
+
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
+                <input
+                  className='border rounded px-3 py-2'
+                  placeholder='Filename (e.g. before.jpg)'
+                  value={fileName}
+                  onChange={(e) => setFileName(e.target.value)}
+                />
+                <input
+                  className='border rounded px-3 py-2'
+                  placeholder='Content-Type (e.g. image/jpeg)'
+                  value={contentType}
+                  onChange={(e) => setContentType(e.target.value)}
+                />
+              </div>
+
+              <button
+                className='border rounded px-3 py-2'
+                onClick={getUploadUrl}
+              >
+                Get upload URL
+              </button>
+
+              {uploadErr ? (
+                <div className='text-sm opacity-80'>{uploadErr}</div>
+              ) : null}
+
+              {uploadResp ? (
+                <div className='text-sm space-y-1'>
+                  <div>
+                    <span className='font-semibold'>photoId:</span>{' '}
+                    {uploadResp.photoId}
+                  </div>
+                  <div>
+                    <span className='font-semibold'>key:</span> {uploadResp.key}
+                  </div>
+                  <div className='break-words'>
+                    <span className='font-semibold'>uploadUrl:</span>{' '}
+                    {uploadResp.uploadUrl}
+                  </div>
+                  <div className='text-xs opacity-60'>
+                    (We’re not uploading the file yet — this just proves the
+                    backend flow.)
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            <div className='p-4'>
               {job.photos.length === 0
-                ? 'No photos yet.'
+                ? 'No photo records yet.'
                 : `${job.photos.length} photo record(s).`}
             </div>
           </div>

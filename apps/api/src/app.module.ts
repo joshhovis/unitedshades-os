@@ -10,9 +10,11 @@ import { JobsModule } from './jobs/jobs.module';
 import { VehiclesService } from './vehicles/vehicles.service';
 import { VehiclesController } from './vehicles/vehicles.controller';
 import { VehiclesModule } from './vehicles/vehicles.module';
+import { JobLineItemsModule } from './job-line-items/job-line-items.module';
+import { JobNotesModule } from './job-notes/job-notes.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, CustomersModule, JobsModule, VehiclesModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, CustomersModule, JobsModule, VehiclesModule, JobLineItemsModule, JobNotesModule],
   controllers: [AppController, JobsController, VehiclesController],
   providers: [AppService, JobsService, VehiclesService],
 })
